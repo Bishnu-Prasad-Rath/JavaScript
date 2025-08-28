@@ -33,3 +33,30 @@ function loginUserMessage(username = "sam"){
 
 console.log(loginUserMessage("Bishnu"));   //when you pass nothing in a function like this like nothing "" this will give you undefined
   
+function calculateCartPrice(val1,val2,...num3){
+ return  val1, val2 , num3;
+}
+
+console.log(calculateCartPrice(2, 3 , 4, 5, 6));   //... --->This is known as rest operator or spread operator depend upon the case we will use.
+
+const user = {
+    name: "Bishnu",
+    price: 199
+};
+
+function handleObject(anyobject){
+  console.log(`Username is : ${anyobject.name} and price is ${anyobject.price}`);
+}
+
+// handleObject(user)
+
+handleObject({name: "Sam", price: 299});   //This is known as passing object directly in a function
+
+const myNewArray = [1, 2, 3, 4, 5];
+
+function handleArray(getarray){
+return console.log(getarray[1]);
+
+}
+// handleArray(myNewArray);
+handleArray([10, 20, 30, 40, 50]);   //This is known as passing array directly in a function
