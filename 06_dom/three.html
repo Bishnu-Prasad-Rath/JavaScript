@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="background-color: #212121;color: #fff;">
+
+
+</body>
+<script>
+    const div1 = document.createElement('div');
+    console.log(div1);
+    div1.className = "day";
+    div1.id = Math.round(Math.random() * 10 + 1)
+    div1.setAttribute("title", "day-div")
+    div1.style.backgroundColor = "lightblue"
+    div1.style.padding = "12px"
+    // div1.innerText = "Welcome to DOM manipulation through JS"
+   const addText = document.createTextNode("Welcome to DOM manipulation through JS")
+   div1.appendChild(addText)
+   document.body.appendChild(div1)
+</script>
+</html>
