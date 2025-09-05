@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML events</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #414141 60%, #222 100%);
+            color: aliceblue;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 32px;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: #ffe4b5;
+            text-shadow: 0 3px 12px #222, 0 1px 0 #444;
+        }
+        #images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            justify-content: center;
+            list-style-type: none;
+            padding: 0;
+            margin: 30px auto 0 auto;
+            max-width: 900px;
+        }
+        #images li {
+            background: rgba(110, 110, 110, 0.22);
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            padding: 18px;
+            transition: transform 0.18s, box-shadow 0.18s;
+            display: flex;
+            align-items: center;
+        }
+        #images li:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.29);
+            background: rgba(70, 70, 60, 0.32);
+        }
+        #images img {
+            border-radius: 14px;
+            border: 2px solid #ffe4b5;
+            box-shadow: 0 2px 14px rgba(180,180,180,0.13);
+            transition: box-shadow 0.14s, border 0.14s;
+        }
+        #images img:hover {
+            box-shadow: 0 6px 26px rgba(255,228,181,0.19);
+            border-color: #ffae42;
+        }
+        #google {
+            display: block;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 8px;
+            padding: 10px 24px;
+            border-radius: 12px;
+            background: #ffae42;
+            color: #222 !important;
+            text-decoration: none;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+            box-shadow: 0 2px 8px rgba(255,174,66,0.19);
+        }
+        #google:hover {
+            background: #ffe4b5;
+            color: #222 !important;
+            box-shadow: 0 4px 18px #ffae42a3;
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            #images {
+                gap: 18px;
+            }
+            #images li {
+                padding: 8px;
+            }
+            #images img {
+                width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Amazing image</h2>
+    <div>
+        <ul id="images">
+            <li><img width="200px" id="photoshop" src="https://images.pexels.com/photos/3561339/pexels-photo-3561339.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt="photoshop"></li>
+            <li><img width="200px" id="japan" src="https://images.pexels.com/photos/3532553/pexels-photo-3532553.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt=""></li>
+            <li><img width="200px" id="river" src="https://images.pexels.com/photos/3532551/pexels-photo-3532551.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt=""></li>
+            <li><img width="200px" id="owl" src="https://images.pexels.com/photos/3532552/pexels-photo-3532552.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt=""></li>
+            <li><img width="200px" id="prayer" src="https://images.pexels.com/photos/2522671/pexels-photo-2522671.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt=""></li>
+            <li><a style="color: aliceblue;" href="https://google.com" id="google">Google</a></li>
+        </ul>
+    </div>
+</body>
+<script>
+//Each action always done by user is called an event.
+//Clicking a button, hovering the mouse, pressing a key, resizing the window, loading etc.
+// document.getElementById('owl').onclick = function() {    -->This method is good but not much have any features.
+//     alert('Owl image clicked!');
+// };   
+//attachEvent of multiple events to a single element
+//JQuery - onEvent
+//time ,timestamp, default prevent, event propagation, event bubbling, event capturing
+//target ,toElement, currentTarget, srcElement
+//mouse events, keyboard events, form events, window events
+//clientX, clientY, screenX, screenY, offsetX, offsetY, pageX, pageY
+// altkey, ctrlKey, shiftKey, which, charCode, keyCode
+//Mouse events - click, dblclick, mouseover, mouseout, mousemove, mousedown, mouseup
+//Keyboard events - keydown, keyup, keypress
+// document.getElementById('images').addEventListener('click', function(e) {
+//     console.log('Clicked inside the ul');
+// },false);
+// document.getElementById('owl').addEventListener('click', function(e) {
+//     console.log('owl clicked');
+//     e.stopPropagation()
+// },false);  //-->The default values always be false because it means it always print in bubble manner iwl will first then after that ul wil be printed.
+// // document.getElementById('owl').addEventListener('click', function(e) {
+// //     console.log('owl clicked');
+// // },true);  -->But in case of true it leads to capturing mode means it will first print the ul then owl after that.
+// document.getElementById('google').addEventListener('click',function(e){
+// console.log("google clicked");
+// e.preventDefault()
+// },false)
+document.querySelector('#images').addEventListener('click',function(e){
+console.log(e.target.tagName);
+if (e.target.tagName === 'IMG') {
+    let removeIt = e.target.parentNode
+// removeIt.remove()  -->This is the first method
+removeIt.parentNode.removeChild(removeIt)
+}
+},false)
+
+</script>
+</html>

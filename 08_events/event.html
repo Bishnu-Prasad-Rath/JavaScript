@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Events: Complete Guide</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #ff9a3c;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin: 25px 0 15px;
+            color: #6fc2d3;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 20px 0 10px;
+            color: #ff9a3c;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .demo-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .interactive-box {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        
+        .interactive-box:active {
+            transform: scale(0.98);
+        }
+        
+        .info-text {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            min-height: 120px;
+            margin: 20px 0;
+            overflow-y: auto;
+            max-height: 250px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .keyboard-test {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            outline: none;
+        }
+        
+        .coords-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .coord-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            font-family: monospace;
+        }
+        
+        .event-bubbling {
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .inner {
+            background: rgba(107, 66, 176, 0.5);
+            padding: 25px;
+            margin: 15px;
+            border-radius: 8px;
+        }
+        
+        .inner-most {
+            background: rgba(176, 66, 66, 0.5);
+            padding: 20px;
+            margin: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .key {
+            display: inline-block;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin: 0 4px;
+            font-family: monospace;
+        }
+        
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 20px 0;
+            line-height: 1.5;
+            font-size: 1.1rem;
+        }
+        
+        .highlight {
+            color: #ff9a3c;
+            font-weight: bold;
+        }
+        
+        .event-log {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+        
+        .timestamp {
+            color: #6fc2d3;
+        }
+        
+        .button {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        
+        .button:hover {
+            background: linear-gradient(to right, #2575fc, #6a11cb);
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            h2 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JavaScript Events: Complete Guide</h1>
+            <p>Learn about event handling, propagation, and different event types with interactive examples</p>
+        </header>
+        
+        <section>
+            <h2>What are Events in JavaScript?</h2>
+            <p>Events are actions or occurrences that happen in the browser, which you can respond to using JavaScript. They allow for interactive web pages.</p>
+            
+            <div class="demo-area">
+                <h3>Try It Out:</h3>
+                <div class="interactive-box" id="demoBox">
+                    <p>Click, double-click, or move your mouse here</p>
+                </div>
+                <div class="info-text" id="output">
+                    Event info will appear here...
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Event Propagation: Bubbling and Capturing</h2>
+            <p>Events propagate in two phases: capturing (from window to target) and bubbling (from target back to window).</p>
+            
+            <div class="event-bubbling" id="outer">
+                <h3>Outer element</h3>
+                <div class="inner" id="middle">
+                    <h3>Middle element</h3>
+                    <div class="inner-most" id="inner">
+                        <h3>Inner element (click me)</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-text" id="bubblingOutput">
+                Propagation info will appear here...
+            </div>
+            
+            <button class="button" id="clearBubbling">Clear Output</button>
+        </section>
+        
+        <section>
+            <h2>Event Object Properties</h2>
+            <p>When an event occurs, the browser creates an event object with properties describing the event.</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>Target Elements</h3>
+                    <p><span class="highlight">target</span>: The element that triggered the event</p>
+                    <p><span class="highlight">currentTarget</span>: The element that the event handler is attached to</p>
+                    <p><span class="highlight">srcElement</span>: Alias for target (older browsers)</p>
+                    <p><span class="highlight">toElement</span>: Used in mouseover/mouseout events</p>
+                </div>
+                
+                <div class="card">
+                    <h3>Keyboard Properties</h3>
+                    <p><span class="highlight">altKey</span>, <span class="highlight">ctrlKey</span>, <span class="highlight">shiftKey</span>: Boolean for modifier keys</p>
+                    <p><span class="highlight">keyCode</span>, <span class="highlight">which</span>: Code of pressed key (deprecated)</p>
+                    <p><span class="highlight">charCode</span>: Unicode value of character (deprecated)</p>
+                    <p>Modern code should use <span class="highlight">key</span> property instead</p>
+                </div>
+                
+                <div class="card">
+                    <h3>Mouse Coordinates</h3>
+                    <p><span class="highlight">clientX/clientY</span>: Relative to viewport</p>
+                    <p><span class="highlight">pageX/pageY</span>: Relative to document</p>
+                    <p><span class="highlight">screenX/screenY</span>: Relative to screen</p>
+                    <p><span class="highlight">offsetX/offsetY</span>: Relative to target element</p>
+                </div>
+            </div>
+            
+            <div class="demo-area">
+                <h3>Mouse Position Demo:</h3>
+                <div class="interactive-box" id="coordDemo">
+                    <p>Move your mouse over this area</p>
+                </div>
+                <div class="coords-display">
+                    <div class="coord-item">clientX: <span id="clientX">0</span></div>
+                    <div class="coord-item">clientY: <span id="clientY">0</span></div>
+                    <div class="coord-item">pageX: <span id="pageX">0</span></div>
+                    <div class="coord-item">pageY: <span id="pageY">0</span></div>
+                    <div class="coord-item">offsetX: <span id="offsetX">0</span></div>
+                    <div class="coord-item">offsetY: <span id="offsetY">0</span></div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Event Types</h2>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>Mouse Events</h3>
+                    <p><span class="highlight">click</span>: Element is clicked</p>
+                    <p><span class="highlight">dblclick</span>: Element is double-clicked</p>
+                    <p><span class="highlight">mouseover</span>: Mouse moves onto an element</p>
+                    <p><span class="highlight">mouseout</span>: Mouse moves out of an element</p>
+                    <p><span class="highlight">mousemove</span>: Mouse moves over an element</p>
+                    <p><span class="highlight">mousedown</span>: Mouse button is pressed</p>
+                    <p><span class="highlight">mouseup</span>: Mouse button is released</p>
+                    
+                    <div class="event-log" id="mouseEvents">
+                        Mouse events will appear here...
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Keyboard Events</h3>
+                    <p><span class="highlight">keydown</span>: Key is pressed down</p>
+                    <p><span class="highlight">keyup</span>: Key is released</p>
+                    <p><span class="highlight">keypress</span>: Key is pressed (deprecated)</p>
+                    
+                    <div class="keyboard-test" tabindex="0" id="keyboardTest">
+                        <p>Click here and type to test keyboard events:</p>
+                        <div class="info-text" id="keyboardOutput">
+                            Keyboard events will appear here...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Form & Window Events</h3>
+                    <p><span class="highlight">focus</span>/<span class="highlight">blur</span>: Element gains/loses focus</p>
+                    <p><span class="highlight">submit</span>: Form is submitted</p>
+                    <p><span class="highlight">change</span>: Input value changes</p>
+                    <p><span class="highlight">input</span>: Input value is being changed</p>
+                    <p><span class="highlight">load</span>/<span class="highlight">unload</span>: Page loads/unloads</p>
+                    <p><span class="highlight">resize</span>: Window is resized</p>
+                    <p><span class="highlight">scroll</span>: Element is scrolled</p>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Event Methods</h2>
+            <div class="code">
+                // Preventing default browser behavior<br>
+                event.preventDefault();<br><br>
+                
+                // Stopping event propagation<br>
+                event.stopPropagation();<br><br>
+                
+                // Stopping immediate propagation<br>
+                event.stopImmediatePropagation();
+            </div>
+            
+            <div class="demo-area">
+                <h3>Prevent Default Example:</h3>
+                <p>Try to right-click here. Normally it would show a context menu, but we're preventing it.</p>
+                <div class="interactive-box" id="contextDemo">
+                    <p>Right-click here (contextmenu event prevented)</p>
+                </div>
+                
+                <h3>Stop Propagation Example:</h3>
+                <p>Click the buttons below to see how stopPropagation works:</p>
+                <button class="button" id="propagateButton">Normal Button (propagates)</button>
+                <button class="button" id="stopPropagateButton">Stop Propagation Button</button>
+                <div class="info-text" id="propagationOutput">
+                    Event propagation results will appear here...
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Event Delegation Example</h2>
+            <p>Event delegation allows you to attach a single event listener to a parent element that will fire for all descendants matching a selector.</p>
+            
+            <div class="demo-area">
+                <div class="interactive-box" id="delegationParent">
+                    <p>Click on any of the buttons below:</p>
+                    <div style="margin-top: 20px;">
+                        <button class="button" data-id="1">Button 1</button>
+                        <button class="button" data-id="2">Button 2</button>
+                        <button class="button" data-id="3">Button 3</button>
+                    </div>
+                </div>
+                <div class="info-text" id="delegationOutput">
+                    Event delegation results will appear here...
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Custom Events</h2>
+            <p>You can create and dispatch your own custom events in JavaScript.</p>
+            
+            <div class="demo-area">
+                <button class="button" id="dispatchEvent">Dispatch Custom Event</button>
+                <div class="info-text" id="customEventOutput">
+                    Custom event results will appear here...
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Demo box for general events
+        const demoBox = document.getElementById('demoBox');
+        const output = document.getElementById('output');
+        
+        demoBox.addEventListener('click', function(e) {
+            output.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Click event<br>`;
+            output.innerHTML += `Target: ${e.target.id}, CurrentTarget: ${e.currentTarget.id}<br>`;
+            output.innerHTML += `Coordinates: clientX=${e.clientX}, clientY=${e.clientY}`;
+        });
+        
+        demoBox.addEventListener('dblclick', function(e) {
+            output.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Double-click event`;
+        });
+        
+        demoBox.addEventListener('mouseover', function(e) {
+            output.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Mouseover event - mouse entered the element`;
+        });
+        
+        demoBox.addEventListener('mouseout', function(e) {
+            output.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Mouseout event - mouse left the element`;
+        });
+        
+        // Event propagation demo
+        const outer = document.getElementById('outer');
+        const middle = document.getElementById('middle');
+        const inner = document.getElementById('inner');
+        const bubblingOutput = document.getElementById('bubblingOutput');
+        const clearBubbling = document.getElementById('clearBubbling');
+        
+        function handlePropagation(e) {
+            bubblingOutput.innerHTML += `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - ${e.currentTarget.id} was triggered (phase: ${e.eventPhase})<br>`;
+        }
+        
+        // Capturing phase
+        outer.addEventListener('click', handlePropagation, true);
+        middle.addEventListener('click', handlePropagation, true);
+        inner.addEventListener('click', handlePropagation, true);
+        
+        // Bubbling phase
+        outer.addEventListener('click', handlePropagation);
+        middle.addEventListener('click', handlePropagation);
+        inner.addEventListener('click', handlePropagation);
+        
+        clearBubbling.addEventListener('click', function() {
+            bubblingOutput.innerHTML = "Propagation info cleared. Click on the inner element to see propagation order:<br>";
+        });
+        
+        // Mouse coordinates demo
+        const coordDemo = document.getElementById('coordDemo');
+        
+        coordDemo.addEventListener('mousemove', function(e) {
+            document.getElementById('clientX').textContent = e.clientX;
+            document.getElementById('clientY').textContent = e.clientY;
+            document.getElementById('pageX').textContent = e.pageX;
+            document.getElementById('pageY').textContent = e.pageY;
+            document.getElementById('offsetX').textContent = e.offsetX;
+            document.getElementById('offsetY').textContent = e.offsetY;
+        });
+        
+        // Keyboard events demo
+        const keyboardDemo = document.getElementById('keyboardTest');
+        const keyboardOutput = document.getElementById('keyboardOutput');
+        
+        keyboardDemo.addEventListener('keydown', function(e) {
+            keyboardOutput.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Keydown: key='${e.key}', code='${e.code}'<br>`;
+            keyboardOutput.innerHTML += `Modifiers: alt=${e.altKey}, ctrl=${e.ctrlKey}, shift=${e.shiftKey}`;
+        });
+        
+        keyboardDemo.addEventListener('keyup', function(e) {
+            keyboardOutput.innerHTML += `<br><span class="timestamp">${new Date().toLocaleTimeString()}</span> - Keyup: key='${e.key}'`;
+        });
+        
+        // Prevent default example
+        const contextDemo = document.getElementById('contextDemo');
+        
+        contextDemo.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            output.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Contextmenu event prevented`;
+        });
+        
+        // Stop propagation example
+        const propagateButton = document.getElementById('propagateButton');
+        const stopPropagateButton = document.getElementById('stopPropagateButton');
+        const propagationOutput = document.getElementById('propagationOutput');
+        const body = document.body;
+        
+        body.addEventListener('click', function() {
+            propagationOutput.innerHTML += `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Body click event (propagation)<br>`;
+        });
+        
+        propagateButton.addEventListener('click', function(e) {
+            propagationOutput.innerHTML += `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Normal button clicked (will propagate)<br>`;
+        });
+        
+        stopPropagateButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            propagationOutput.innerHTML += `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Stop propagation button clicked (propagation stopped)<br>`;
+        });
+        
+        // Event delegation example
+        const delegationParent = document.getElementById('delegationParent');
+        const delegationOutput = document.getElementById('delegationOutput');
+        
+        delegationParent.addEventListener('click', function(e) {
+            if (e.target.classList.contains('button')) {
+                delegationOutput.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Button ${e.target.dataset.id} clicked using event delegation<br>`;
+                delegationOutput.innerHTML += `Target: ${e.target.textContent}, CurrentTarget: ${e.currentTarget.id}`;
+            }
+        });
+        
+        // Custom events example
+        const dispatchEventBtn = document.getElementById('dispatchEvent');
+        const customEventOutput = document.getElementById('customEventOutput');
+        
+        // Create a custom event
+        const customEvent = new CustomEvent('myCustomEvent', {
+            detail: { message: 'This is a custom event!', time: new Date() },
+            bubbles: true,
+            cancelable: true
+        });
+        
+        // Listen for the custom event
+        document.addEventListener('myCustomEvent', function(e) {
+            customEventOutput.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - Custom event received<br>`;
+            customEventOutput.innerHTML += `Detail: ${e.detail.message} at ${e.detail.time.toLocaleTimeString()}`;
+        });
+        
+        // Dispatch the custom event when button is clicked
+        dispatchEventBtn.addEventListener('click', function() {
+            document.dispatchEvent(customEvent);
+        });
+        
+        // Mouse events logging
+        const mouseEventsLog = document.getElementById('mouseEvents');
+        demoBox.addEventListener('mousedown', logMouseEvent);
+        demoBox.addEventListener('mouseup', logMouseEvent);
+        demoBox.addEventListener('mousemove', _.throttle(logMouseEvent, 500)); // Throttle mousemove events
+        
+        function logMouseEvent(e) {
+            mouseEventsLog.innerHTML += `<span class="timestamp">${new Date().toLocaleTimeString()}</span> - ${e.type}<br>`;
+            // Keep log from growing too large
+            if (mouseEventsLog.children.length > 8) {
+                mouseEventsLog.innerHTML = mouseEventsLog.innerHTML.split('<br>').slice(-8).join('<br>');
+            }
+        }
+        
+        // Lodash throttle function (simplified)
+        function _throttle(func, wait) {
+            let timeout = null;
+            let previous = 0;
+            
+            return function() {
+                const now = Date.now();
+                if (!previous) previous = now;
+                const remaining = wait - (now - previous);
+                
+                if (remaining <= 0) {
+                    clearTimeout(timeout);
+                    previous = now;
+                    func.apply(this, arguments);
+                } else if (!timeout) {
+                    timeout = setTimeout(() => {
+                        previous = Date.now();
+                        timeout = null;
+                        func.apply(this, arguments);
+                    }, remaining);
+                }
+            };
+        }
+        
+        // Clear propagation output on page load
+        bubblingOutput.innerHTML = "Click on the inner element to see propagation order:<br>";
+    </script>
+</body>
+</html>
