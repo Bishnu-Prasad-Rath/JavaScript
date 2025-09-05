@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced JavaScript Event Loop Visualization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 30px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            color: #ff9a3c;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        h2 {
+            font-size: 2.2rem;
+            margin: 30px 0 20px;
+            color: #6fc2d3;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 15px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        h3 {
+            font-size: 1.6rem;
+            margin: 25px 0 15px;
+            color: #ff9a3c;
+            position: relative;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            position: relative;
+        }
+        
+        .visualization {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            margin-bottom: 50px;
+        }
+        
+        @media (max-width: 900px) {
+            .visualization {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .component {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            min-height: 350px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .component::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff9a3c, #ff6b6b);
+        }
+        
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .call-stack::before {
+            background: linear-gradient(90deg, #ff6b6b, #c44569);
+        }
+        
+        .web-apis::before {
+            background: linear-gradient(90deg, #4ecdc4, #00b894);
+        }
+        
+        .callback-queue::before {
+            background: linear-gradient(90deg, #ff9a3c, #fdcb6e);
+        }
+        
+        .call-stack {
+            border-top: 5px solid #ff6b6b;
+        }
+        
+        .web-apis {
+            border-top: 5px solid #4ecdc4;
+        }
+        
+        .callback-queue {
+            border-top: 5px solid #ff9a3c;
+        }
+        
+        .event-loop {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 30px;
+            margin-top: 30px;
+            background: rgba(107, 66, 176, 0.2);
+            border: 2px dashed #6b42b0;
+            border-radius: 20px;
+            position: relative;
+        }
+        
+        .stack-item, .api-item, .queue-item {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease;
+            border-left: 4px solid;
+        }
+        
+        .stack-item:hover, .api-item:hover, .queue-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .stack-item {
+            border-left-color: #ff6b6b;
+            background: linear-gradient(90deg, rgba(255, 107, 107, 0.25), transparent);
+        }
+        
+        .api-item {
+            border-left-color: #4ecdc4;
+            background: linear-gradient(90deg, rgba(78, 205, 196, 0.25), transparent);
+        }
+        
+        .queue-item {
+            border-left-color: #ff9a3c;
+            background: linear-gradient(90deg, rgba(255, 154, 60, 0.25), transparent);
+        }
+        
+        .item-label {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .item-details {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+        
+        .animation-area {
+            position: relative;
+            height: 120px;
+            margin: 30px 0;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .moving-item {
+            position: absolute;
+            width: 90px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff9a3c, #ff6b6b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            animation: moveRight 4s infinite ease-in-out;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        @keyframes moveRight {
+            0% { left: 10px; top: 35px; transform: scale(0.9); }
+            25% { left: 30%; top: 35px; transform: scale(1.1); }
+            50% { left: 60%; top: 35px; transform: scale(0.9); }
+            75% { left: 30%; top: 35px; transform: scale(1.1); }
+            100% { left: 10px; top: 35px; transform: scale(0.9); }
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn i {
+            font-size: 20px;
+        }
+        
+        .explanation {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 35px;
+            border-radius: 20px;
+            margin: 40px 0;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            margin: 25px 0;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            border-left: 5px solid #ff9a3c;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .highlight {
+            color: #ff9a3c;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .diagram {
+            text-align: center;
+            margin: 40px 0;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+        }
+        
+        .legend-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .color-box {
+            width: 25px;
+            height: 25px;
+            margin-right: 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-call-stack {
+            background: #ff6b6b;
+        }
+        
+        .color-web-apis {
+            background: #4ecdc4;
+        }
+        
+        .color-callback-queue {
+            background: #ff9a3c;
+        }
+        
+        .color-event-loop {
+            background: #6b42b0;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .simulation-active {
+            box-shadow: 0 0 20px rgba(255, 154, 60, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-infinity"></i> JavaScript Event Loop</h1>
+            <p>Visualization of how JavaScript handles asynchronous operations</p>
+        </header>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="color-box color-call-stack"></div>
+                <span>Call Stack</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box color-web-apis"></div>
+                <span>Web APIs</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box color-callback-queue"></div>
+                <span>Callback Queue</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box color-event-loop"></div>
+                <span>Event Loop</span>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <div class="component call-stack">
+                <div class="counter">3</div>
+                <h2><i class="fas fa-layer-group"></i> Call Stack</h2>
+                <p>LIFO structure where functions are executed</p>
+                <div class="stack-item">
+                    <span class="item-label">global()</span>
+                    <span class="item-details">Main context</span>
+                </div>
+                <div class="stack-item">
+                    <span class="item-label">hello()</span>
+                    <span class="item-details">Line 12</span>
+                </div>
+                <div class="stack-item">
+                    <span class="item-label">console.log()</span>
+                    <span class="item-details">Line 5</span>
+                </div>
+            </div>
+            
+            <div class="component web-apis">
+                <div class="counter">4</div>
+                <h2><i class="fas fa-cogs"></i> Web APIs</h2>
+                <p>Browser-provided APIs for async operations</p>
+                <div class="api-item">
+                    <span class="item-label">DOM API</span>
+                    <span class="item-details">click, mouse events</span>
+                </div>
+                <div class="api-item">
+                    <span class="item-label">setTimeout</span>
+                    <span class="item-details">Timer: 2000ms</span>
+                </div>
+                <div class="api-item">
+                    <span class="item-label">setInterval</span>
+                    <span class="item-details">Interval: 1000ms</span>
+                </div>
+                <div class="api-item">
+                    <span class="item-label">Promise</span>
+                    <span class="item-details">Async operation</span>
+                </div>
+            </div>
+            
+            <div class="component callback-queue">
+                <div class="counter">3</div>
+                <h2><i class="fas fa-tasks"></i> Callback Queue</h2>
+                <p>Holds callbacks waiting to be executed</p>
+                <div class="queue-item">
+                    <span class="item-label">Button Click CB</span>
+                    <span class="item-details">From DOM API</span>
+                </div>
+                <div class="queue-item">
+                    <span class="item-label">Timer CB</span>
+                    <span class="item-details">From setTimeout</span>
+                </div>
+                <div class="queue-item">
+                    <span class="item-label">Promise CB</span>
+                    <span class="item-details">From fetch API</span>
+                </div>
+            </div>
+            
+            <div class="event-loop">
+                <h2 class="pulse"><i class="fas fa-circle-notch"></i> Event Loop</h2>
+                <p>Continuously checks if call stack is empty and moves callbacks from queue to stack</p>
+                <div class="animation-area">
+                    <div class="moving-item">Callback</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="addStack"><i class="fas fa-plus-circle"></i> Add to Call Stack</button>
+            <button class="btn" id="addAPI"><i class="fas fa-plug"></i> Add Web API</button>
+            <button class="btn" id="addQueue"><i class="fas fa-list"></i> Add to Callback Queue</button>
+            <button class="btn" id="simulate"><i class="fas fa-play-circle"></i> Simulate Event Loop</button>
+        </div>
+        
+        <div class="explanation">
+            <h2><i class="fas fa-lightbulb"></i> How the JavaScript Event Loop Works</h2>
+            <p>JavaScript is single-threaded, meaning it can only execute one operation at a time. However, it can handle asynchronous operations through the event loop mechanism.</p>
+            
+            <h3><i class="fas fa-puzzle-piece"></i> The Components:</h3>
+            <ul>
+                <li><span class="highlight">Call Stack</span>: Where function calls are stored and executed (LIFO - Last In, First Out)</li>
+                <li><span class="highlight">Web APIs</span>: Provided by the browser (setTimeout, DOM events, HTTP requests)</li>
+                <li><span class="highlight">Callback Queue</span>: Holds callback functions waiting to be executed</li>
+                <li><span class="highlight">Event Loop</span>: Continuously checks if the call stack is empty and moves callbacks from the queue to the stack</li>
+            </ul>
+            
+            <div class="code">
+// Example of asynchronous JavaScript
+console.log('Start');
+
+setTimeout(function() {
+    console.log('Timeout callback');
+}, 2000);
+
+console.log('End');
+
+// Output:
+// Start
+// End
+// Timeout callback (after 2 seconds)
+            </div>
+            
+            <h3><i class="fas fa-list-ol"></i> Process Explanation:</h3>
+            <ol>
+                <li>"Start" is logged to console</li>
+                <li>setTimeout is called and handed off to Web APIs</li>
+                <li>"End" is logged to console</li>
+                <li>After 2 seconds, the timeout callback moves to the Callback Queue</li>
+                <li>When the Call Stack is empty, the Event Loop moves the callback to the Stack</li>
+                <li>"Timeout callback" is logged to console</li>
+            </ol>
+        </div>
+        
+        <div class="diagram">
+            <h2><i class="fas fa-project-diagram"></i> Event Loop Diagram</h2>
+            <div style="background:rgba(255,255,255,0.9); padding:25px; border-radius:15px; display:inline-block; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Call Stack -->
+                    <rect x="50" y="50" width="200" height="300" fill="#ff6b6b" opacity="0.3" stroke="#ff6b6b" stroke-width="3" rx="10" />
+                    <text x="150" y="40" text-anchor="middle" fill="#ff6b6b" font-weight="bold" font-size="18">Call Stack</text>
+                    <rect x="70" y="70" width="160" height="40" fill="#ff6b6b" opacity="0.7" rx="8" />
+                    <text x="150" y="95" text-anchor="middle" fill="white">global()</text>
+                    <rect x="70" y="120" width="160" height="40" fill="#ff6b6b" opacity="0.7" rx="8" />
+                    <text x="150" y="145" text-anchor="middle" fill="white">hello()</text>
+                    <rect x="70" y="170" width="160" height="40" fill="#ff6b6b" opacity="0.7" rx="8" />
+                    <text x="150" y="195" text-anchor="middle" fill="white">console.log()</text>
+                    
+                    <!-- Web APIs -->
+                    <rect x="350" y="50" width="200" height="300" fill="#4ecdc4" opacity="0.3" stroke="#4ecdc4" stroke-width="3" rx="10" />
+                    <text x="450" y="40" text-anchor="middle" fill="#4ecdc4" font-weight="bold" font-size="18">Web APIs</text>
+                    <rect x="370" y="70" width="160" height="40" fill="#4ecdc4" opacity="0.7" rx="8" />
+                    <text x="450" y="95" text-anchor="middle" fill="white">setTimeout</text>
+                    <rect x="370" y="120" width="160" height="40" fill="#4ecdc4" opacity="0.7" rx="8" />
+                    <text x="450" y="145" text-anchor="middle" fill="white">DOM API</text>
+                    <rect x="370" y="170" width="160" height="40" fill="#4ecdc4" opacity="0.7" rx="8" />
+                    <text x="450" y="195" text-anchor="middle" fill="white">Promise</text>
+                    
+                    <!-- Callback Queue -->
+                    <rect x="350" y="250" width="200" height="100" fill="#ff9a3c" opacity="0.3" stroke="#ff9a3c" stroke-width="3" rx="10" />
+                    <text x="450" y="240" text-anchor="middle" fill="#ff9a3c" font-weight="bold" font-size="18">Callback Queue</text>
+                    <rect x="370" y="270" width="160" height="30" fill="#ff9a3c" opacity="0.7" rx="5" />
+                    <text x="450" y="290" text-anchor="middle" fill="white">Callback Functions</text>
+                    
+                    <!-- Event Loop -->
+                    <circle cx="300" cy="300" r="40" fill="#6b42b0" opacity="0.3" stroke="#6b42b0" stroke-width="3" />
+                    <text x="300" y="300" text-anchor="middle" fill="#6b42b0" font-weight="bold">Event Loop</text>
+                    
+                    <!-- Arrows -->
+                    <path d="M250 150 L320 150 L320 250 L350 250" stroke="#6b42b0" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+                    <path d="M450 200 L450 245" stroke="#6b42b0" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+                    <path d="M300 340 L300 380 L150 380 L150 350" stroke="#6b42b0" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+                    
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6b42b0"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced simulation for the buttons
+        document.getElementById('addStack').addEventListener('click', function() {
+            this.classList.add('simulation-active');
+            setTimeout(() => {
+                this.classList.remove('simulation-active');
+            }, 1000);
+            
+            const callStack = document.querySelector('.call-stack');
+            const newItem = document.createElement('div');
+            newItem.className = 'stack-item';
+            newItem.innerHTML = '<span class="item-label">newFunction()</span><span class="item-details">Added dynamically</span>';
+            callStack.appendChild(newItem);
+            
+            // Update counter
+            const counter = callStack.querySelector('.counter');
+            counter.textContent = parseInt(counter.textContent) + 1;
+        });
+        
+        document.getElementById('addAPI').addEventListener('click', function() {
+            this.classList.add('simulation-active');
+            setTimeout(() => {
+                this.classList.remove('simulation-active');
+            }, 1000);
+            
+            const webAPIs = document.querySelector('.web-apis');
+            const newItem = document.createElement('div');
+            newItem.className = 'api-item';
+            newItem.innerHTML = '<span class="item-label">fetch</span><span class="item-details">API request</span>';
+            webAPIs.appendChild(newItem);
+            
+            // Update counter
+            const counter = webAPIs.querySelector('.counter');
+            counter.textContent = parseInt(counter.textContent) + 1;
+        });
+        
+        document.getElementById('addQueue').addEventListener('click', function() {
+            this.classList.add('simulation-active');
+            setTimeout(() => {
+                this.classList.remove('simulation-active');
+            }, 1000);
+            
+            const callbackQueue = document.querySelector('.callback-queue');
+            const newItem = document.createElement('div');
+            newItem.className = 'queue-item';
+            newItem.innerHTML = '<span class="item-label">Event CB</span><span class="item-details">From click event</span>';
+            callbackQueue.appendChild(newItem);
+            
+            // Update counter
+            const counter = callbackQueue.querySelector('.counter');
+            counter.textContent = parseInt(counter.textContent) + 1;
+        });
+        
+        document.getElementById('simulate').addEventListener('click', function() {
+            this.classList.add('simulation-active');
+            setTimeout(() => {
+                this.classList.remove('simulation-active');
+            }, 2000);
+            
+            // Simulate event loop moving item from queue to stack
+            const callbackQueue = document.querySelector('.callback-queue');
+            const callStack = document.querySelector('.call-stack');
+            
+            if (callbackQueue.children.length > 3) { // Skip the counter and header
+                const item = callbackQueue.lastElementChild;
+                item.classList.add('floating');
+                
+                setTimeout(() => {
+                    callbackQueue.removeChild(item);
+                    callStack.appendChild(item);
+                    item.classList.remove('floating');
+                    
+                    // Update counters
+                    const queueCounter = callbackQueue.querySelector('.counter');
+                    queueCounter.textContent = parseInt(queueCounter.textContent) - 1;
+                    
+                    const stackCounter = callStack.querySelector('.counter');
+                    stackCounter.textContent = parseInt(stackCounter.textContent) + 1;
+                }, 1000);
+            }
+        });
+        
+        // Enhanced animation for the event loop
+        const movingItem = document.querySelector('.moving-item');
+        let animationPaused = false;
+        
+        movingItem.addEventListener('click', function() {
+            if (animationPaused) {
+                movingItem.style.animationPlayState = 'running';
+                animationPaused = false;
+            } else {
+                movingItem.style.animationPlayState = 'paused';
+                animationPaused = true;
+            }
+        });
+        
+        // Add subtle animation to components
+        const components = document.querySelectorAll('.component');
+        components.forEach(component => {
+            component.addEventListener('mouseenter', () => {
+                component.classList.add('pulse');
+            });
+            
+            component.addEventListener('mouseleave', () => {
+                component.classList.remove('pulse');
+            });
+        });
+    </script>
+</body>
+</html>
