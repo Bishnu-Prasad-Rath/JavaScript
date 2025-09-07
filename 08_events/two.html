@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Chai aur code</h1>
+    <button id="stop">stop</button>
+</body>
+<script>
+    const bishnu = function(){
+console.log("Bishnu");
+    }
+    setTimeout(bishnu, 2000)    //The difference between setTimeout and setInterval is setTimeout execute the code only one time but in case of setInterval it execute the code per 2 seconds it runs like a loop.
+
+const changeText = function(){
+    document.querySelector('h1').innerHTML = "Best JS Series"
+}
+const changeMe = setTimeout(changeText, 2000)
+    document.querySelector('#stop').addEventListener('click',function(){
+        clearTimeout(changeMe)
+        console.log("Stopped");
+    })
+</script>
+</html>
