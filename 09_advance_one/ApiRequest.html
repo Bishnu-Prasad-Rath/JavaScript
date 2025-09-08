@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub API User Card</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #212121;
+            color: azure;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .instructions h2 {
+            margin-top: 0;
+            color: #6e8efb;
+        }
+        
+        .state-list {
+            text-align: left;
+            display: inline-block;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        button {
+            background-color: #6e8efb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+        
+        button:hover {
+            background-color: #5d7df0;
+            transform: translateY(-2px);
+        }
+        
+        .card {
+            width: 300px;
+            background: linear-gradient(145deg, #2c2c2c, #252525);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            height: 0;
+            margin-top: 20px;
+        }
+        
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+        }
+        
+        .card img {
+            width: 100%;
+            height: auto;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        
+        .container {
+            padding: 20px;
+        }
+        
+        .container h4 {
+            margin: 10px 0;
+            font-size: 22px;
+            color: #6e8efb;
+            text-align: center;
+        }
+        
+        .container p {
+            margin: 8px 0;
+            color: #ddd;
+            text-align: center;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #6e8efb;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .loading {
+            display: none;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .loading.visible {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #6e8efb;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h2>GitHub API User Card</h2>
+        <p>Click the button to fetch and display GitHub user information:</p>
+        <div class="state-list">
+            <strong>XMLHttpRequest Ready States:</strong><br>
+            0 UNSENT - Client created, open() not called<br>
+            1 OPENED - open() has been called<br>
+            2 HEADERS_RECEIVED - send() called, headers received<br>
+            3 LOADING - Downloading response<br>
+            4 DONE - Operation complete
+        </div>
+    </div>
+
+    <button id="getinfo">Fetch User Data</button>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Fetching data from GitHub API...</p>
+    </div>
+
+    <div class="card" id="card">
+        <img id="avatar" src="" alt="Avatar">
+        <div class="container">
+            <h4 id="name"></h4>
+            <p id="bio"></p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="followers"></div>
+                    <div class="stat-label">Followers</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="following"></div>
+                    <div class="stat-label">Following</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="repos"></div>
+                    <div class="stat-label">Repositories</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status" id="status">
+        ReadyState: Waiting for action...
+    </div>
+
+    <script>
+        const btn = document.getElementById('getinfo');
+        const card = document.getElementById('card');
+        const loading = document.getElementById('loading');
+        const statusDiv = document.getElementById('status');
+        const requestUrl = 'https://api.github.com/users/hiteshchoudhary';
+        
+        // Get references to card elements
+        const avatar = document.getElementById('avatar');
+        const name = document.getElementById('name');
+        const bio = document.getElementById('bio');
+        const followers = document.getElementById('followers');
+        const following = document.getElementById('following');
+        const repos = document.getElementById('repos');
+        
+        // Track if data has been loaded
+        let dataLoaded = false;
+        
+        btn.addEventListener('click', function() {
+            // If card is visible, hide it and return
+            if (card.classList.contains('visible')) {
+                card.classList.remove('visible');
+                btn.textContent = 'Fetch User Data';
+                statusDiv.textContent = 'ReadyState: Card hidden';
+                return;
+            }
+            
+            // If data is already loaded, just show the card
+            if (dataLoaded) {
+                card.classList.add('visible');
+                btn.textContent = 'Hide Card';
+                statusDiv.textContent = 'ReadyState: Displaying cached data';
+                return;
+            }
+            
+            // Show loading indicator
+            loading.classList.add('visible');
+            statusDiv.textContent = 'ReadyState: Request initiated';
+            
+            // Make API request
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', requestUrl);
+            
+            xhr.onreadystatechange = function() {
+                statusDiv.textContent = `ReadyState: ${xhr.readyState} - ${getStateDescription(xhr.readyState)}`;
+                
+                if (xhr.readyState === 4) {
+                    // Hide loading indicator
+                    loading.classList.remove('visible');
+                    
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        console.log(data);
+                        
+                        // Update card with API data
+                        avatar.src = data.avatar_url;
+                        name.textContent = data.name || data.login;
+                        bio.textContent = data.bio || 'No bio available';
+                        followers.textContent = data.followers;
+                        following.textContent = data.following;
+                        repos.textContent = data.public_repos;
+                        
+                        // Show the card
+                        card.classList.add('visible');
+                        btn.textContent = 'Hide Card';
+                        dataLoaded = true;
+                    } else {
+                        statusDiv.textContent = `Error: ${xhr.status} - Failed to fetch data`;
+                        alert('Error fetching data from GitHub API');
+                    }
+                }
+            };
+            
+            xhr.send();
+        });
+        
+        function getStateDescription(state) {
+            switch(state) {
+                case 0: return "UNSENT - Client created, open() not called";
+                case 1: return "OPENED - open() has been called";
+                case 2: return "HEADERS_RECEIVED - send() called, headers received";
+                case 3: return "LOADING - Downloading response";
+                case 4: return "DONE - Operation complete";
+                default: return "Unknown state";
+            }
+        }
+        //If you want to know more about JS that how it works on browser then just search the V8 engine from github. 
+    </script>
+</body>
+</html>
